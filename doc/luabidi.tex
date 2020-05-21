@@ -1,0 +1,237 @@
+% !TeX spellcheck = en_US
+% !TeX TS-program = lualatex
+\documentclass[11pt]{ltxdoc}
+\usepackage{color}
+\usepackage{xspace,fancyvrb,booktabs}
+\usepackage[neverdecrease]{paralist}
+\definecolor{myblue}{rgb}{0.02,0.04,0.48}
+\definecolor{lightblue}{rgb}{0.61,.8,.8}
+\definecolor{myred}{rgb}{0.65,0.04,0.07}
+\usepackage[
+unicode=true,
+bookmarks=true,
+colorlinks=true,
+linkcolor=myblue,
+urlcolor=myblue,
+citecolor=myblue,
+hyperindex=false,
+hyperfootnotes=false,
+pdftitle={luabidi: Bidirectional typesetting in LuaLaTeX},
+pdfauthor={V Khalighi, A Reutenauer, J Spitzmüller},
+pdfkeywords={luatex, lualatex, multilingual, bidi}
+]{hyperref}
+\usepackage{metalogo}
+%\let\XeTeX\undefined
+%\let\XeLaTeX\undefined
+\usepackage{polyglossia}
+\usepackage{luabidi}
+
+\setmainlanguage{english}
+\usepackage[protrusion]{microtype}
+\newcommand*\Cmd[1]{\cmd{#1}\DescribeMacro{#1}\xspace}
+\newcommand*{\cscmd}[1]{\texttt{\textbackslash #1}}
+\newcommand*\pkg[1]{\textsf{\color{myblue}#1}}
+\newcommand*\file[1]{\texttt{\color{myblue}#1}}
+\newcommand*\TR[1]{\textcolor{myred}{#1}}
+\newcommand*\TX[1]{\hyperref[#1]{\textcolor{myred}{#1}}}
+\newcommand*\TB[1]{\textcolor{myblue}{\bf #1}}
+\newcommand*\TA[1]{\textsc{\color{myblue}#1}}
+\newcommand*\link[1]{\href{#1}{#1}}
+\def\eg{\textit{e.g.,}\xspace}
+\def\ie{\textit{i.e.,}\xspace}
+\def\ca{\textit{ca.}\@\xspace}
+\def\Eg{\textit{E.g.,}\xspace}
+\def\Ie{\textit{I.e.,}\xspace}
+\def\etc{\@ifnextchar.{\textit{etc}}{\textit{etc.}\@\xspace}}
+
+%% Sidenotes  << copied from fontspec.dtx
+\newcommand\new[1]{%
+	\edef\thisversion{#1}%
+	\ifhmode\unskip~\fi{\ifx\thisversion\fileversion\color{blue}\else\color[gray]{0.5}\fi
+		$\leftarrow$}%
+	\marginpar{\centering
+		\small\ifx\thisversion\fileversion\color{blue}\else\color[gray]{0.5}\fi
+		\textsf{#1}}}
+\newcommand\displaycmd[2]{%
+	\\\DescribeMacro{#2}\centerline{\cmd{#1}}}
+\renewenvironment{itemize}{\begin{compactitem}[\char"2023]}%[{\fontspec{DejaVu Sans}\char"25BB}]}%
+	{\end{compactitem}}
+
+\def\condbreak#1{%
+	\vskip 0pt plus #1\pagebreak[3]\vskip 0pt plus -#1\relax}
+
+\newcommand*\lbd{\pkg{luabidi}}
+\newcommand*\Lbd{\pkg{Luabidi}}
+
+%% fontspec declarations:
+\setmainfont{Linux Libertine O}
+\setsansfont{Linux Biolinum O}
+\setmonofont[Scale=MatchLowercase]{DejaVu Sans Mono}
+
+\linespread{1.05}
+\frenchspacing
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+% COMMENT THE NEXT LINE TO INCLUDE THE CODE
+\AtBeginDocument{\OnlyDescription}
+
+
+\begin{document}
+\hyphenation{Kha-li-ghi Reu-ten-auer}
+\GetFileInfo{luabidi.sty}
+
+\title{\lbd\\\color{myblue}Bidirectional typesetting in \LuaLaTeX}
+
+\date{\color{myblue}\filedate \qquad \fileversion\\
+	\footnotesize (\textsc{pdf} file generated on \today)}
+
+\author{\TA{Vafa Khalighi} \and \TA{Arthur Reutenauer}\thanks{%
+		Current maintainer. Please submit bug reports and feature requests to \protect\url{https://github.com/bidi-tex/luabidi/issues}.}
+	    \and \TA{Jürgen Spitzmüller}}
+
+\maketitle
+
+\DeleteShortVerb{\|}
+\MakeShortVerb{\¦}
+
+\tableofcontents
+
+\condbreak{2\baselineskip}
+\section{Objectives}
+\Lbd\ is an attempt to provide bidirectional writing support for the \LuaTeX\ engine in the same vein as the \pkg{bidi} package\footnote{%
+See \url{https://ctan.org/pkg/bidi}.} enables bidirectional writing with \XeTeX. The most prominent user of this package is \pkg{polyglossia}\footnote{%
+See \url{https://ctan.org/pkg/polyglossia}.} which uses \lbd\ with RTL languages and \LuaTeX\ output (as opposed to \pkg{bidi} with \XeTeX). Note, however, that \lbd\ is much more limited than \textsf{bidi}. Currently, only a very basic
+subset of the latter's features is supported.
+
+\section{Package Options}
+
+\begin{description}
+	\item[\TB{arabmaths}] By default, \lbd\ generates left-to-right maths. If you would like to have right-to-left maths, use this option.
+	\item[\TB{textwidthfootnoterule}] expands the footnote rule to the whole text width.
+	\item[\TB{autofootnoterule}] sets the footnote rule right or left aligned, depending on the direction of the first footnote
+	that follows the rule (\ie that comes on the current page).
+\end{description}
+
+\section{User Commands}
+
+\subsection{Main Text Direction}
+
+By default, the main directionality of the document is left-to-right. To change it to right-to-left, use the switch
+
+\begin{quote}
+	\Cmd\setRTLmain
+\end{quote}
+%
+This is advisable if your document consists mainly of right-to-left text.
+
+\subsection{Paragraph Text Direction}
+
+To change directionality for paragraphs, you can use the following switches:
+\begin{description}
+	\item[\cmd{\setRTL}]\DescribeMacro{\setRTL} (alias: \Cmd{\setRL}, \Cmd{\unsetLTR}) changes paragraph direction to right-to-left.
+	\item[\cmd{\setLTR}]\DescribeMacro{\setLTR} (alias: \Cmd{\setLR}, \Cmd{\unsetRTL}) changes paragraph direction to left-to-right.
+\end{description}
+%
+\condbreak{2\baselineskip}
+Alternatively,\DescribeMacro{RTL}\DescribeMacro{LTR} you can also use the environments
+
+\begin{quote}
+	\begin{verbatim}
+	\begin{RTL}
+		...
+	\end{RTL}
+	\end{verbatim}
+\end{quote}
+%
+or
+
+\begin{quote}
+	\begin{verbatim}
+	\begin{LTR}
+	...
+	\end{LTR}
+	\end{verbatim}
+\end{quote}
+
+\subsection{Inline Text Direction}
+
+To change directionality for text chunks inside paragraphs, use
+\begin{description}
+	\item[\cmd\RLE\{...\}]\DescribeMacro{\RLE} (alias: \Cmd\RL) changes the directionality locally to right-to-left.
+	\item[\cmd\LRE\{...\}]\DescribeMacro{\LRE} (alias: \Cmd\LR) changes the directionality locally to left-to-right.
+\end{description}
+
+\subsection{Footnotes}
+
+\subsubsection{Horizontal Footnote Position}
+
+\Lbd\ provides two additional footnote commands in addition to standard \cmd{\footnote}:
+\Cmd{\RTLfootnote}\new{v0.5} and \Cmd{\LTRfootnote}\new{v0.5}.
+The standard \cmd{\footnote} command thereby places the footnote always on the side that is currently the origin of direction:
+on the left side of the page in LTR paragraphs and on the right in RTL paragraphs.
+
+\cmd{\LTRfootnote}, in contrast, always places the footnote on the left side, notwithstanding the current
+directionality. \cmd{\RTLfootnote} always places it on the right side. Like \cmd{\footnote}, \cmd{\RTLfootnote}
+and \cmd{\LTRfootnote} have an optional argument to customize the number.
+
+
+\subsubsection{Footnote Rule Length and Position}
+
+By default, the placement of the footnote rule depends on the main text directionality:
+
+\begin{itemize}
+	\item In default mode (\ie if \cmd{\setRTLmain} is not used), the footnote rule is always set left-aligned (as usual in LTR documents).
+	\item If the main direction is RTL (\ie if \cmd{\setRTLmain} is used), the footnote rule is always set right-aligned (as usual in RTL documents)
+\end{itemize}
+%
+However, with the switch \Cmd{\leftfootnoterule}\new{v0.5}, all subsequent footnote rules are always placed on the left.
+Likewise, \Cmd{\rightfootnoterule}\new{v0.5} causes all subsequent footnote rules to be always placed on the right.
+
+The switch \Cmd{\autofootnoterule}\new{v0.5} and the corresponding package option advise \lbd\ to automatically determine the rule position,
+depending on the directionality of the first footnote on the page. Note that this automatic can fail with footnotes at page boundaries
+that differ in directionality from the first footnote on the page. You can work around such cases by switching to \cmd{\rightfootnoterule}
+or \cmd{\leftfootnoterule} on these pages.
+
+If you want a footnote rule that spans the whole text width, you can use the switch \Cmd{\textwidth\-footnoterule}\new{v0.5}
+or the respective package option.
+
+The length of left and right footnote rules can be adjusted via
+
+\begin{quote}
+  ¦\setlength\footenoterulewidth{⟨length⟩}¦\DescribeMacro{\footenoterulewidth}
+\end{quote}
+%
+The predefined ¦⟨length⟩¦ is ¦0.4\columnwidth¦.
+
+
+
+\section{Commands for Package Authors}
+
+The following tests are provided to be used in packages:
+
+\begin{description}
+	\item[\cscmd{if@RTL}]\DescribeMacro{\if@RTL} determines whether the current paragraph direction is right-to-left.
+	\item[\cscmd{if@RTLmain}]\DescribeMacro{\if@RTLmain} determines whether the main direction is right-to-left.
+\end{description}
+%
+The following macros are provided:
+\begin{description}
+	\item[\cscmd{@ensure@RTL\{...\}}]\DescribeMacro{\@ensure@RTL} Ensure that the argument is typeset RTL.
+	\item[\cscmd{@ensure@LTR\{...\}}]\DescribeMacro{\@ensure@LTR} Ensure that the argument is typeset LTR.
+	\item[\cscmd{@ensure@dir\{...\}}]\DescribeMacro{\@ensure@dir} (alias: \cmd{\@ensure@maindir\{...\}}\DescribeMacro{\@ensure@maindir}) If used in RTL mode, the argument is put inside \cmd{\RLE}, if used in LTR mode, the argument is output as is.
+    \item[\cscmd{hboxR\{...\}}]\DescribeMacro{\hboxR}\new{v0.5} Puts its argument in a RTL \cmd{\hbox}.
+\end{description}
+
+\section{Revision Log}
+
+\begin{description}
+	\item[v. 0.5 (2019/10/27)] Add \cmd{\RTLfootnote}, \cmd{\LTRfootnote}, and \cmd{\hboxR}; fix \texttt{autofootnoterule} option; add \cmd{\autofootnoterule},
+	     \cmd{\leftfootnoterule}, \cmd{\rightfootnoterule} and \cmd{\textwidthfootnoterule}; add manual.
+	\item[v. 0.4 (2019/08/24)] Fix \cmd{\@ensure@RTL}.
+	\item[v. 0.3 (2019/07/10)] Fix compatibility with recent \LuaTeX\ (this version was never released to CTAN).
+	\item[v. 0.2 (2013/05/27)] Fix additional files.
+	\item[v. 0.1 (2009/04/01)] Initial release.
+\end{description}
+
+\end{document}
